@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Калькулятор вкладов</string>
+
+    <string name="conditions">Условия вклада</string>
+    <string name="amount">Сумма вклада, ₽</string>
+    <string name="amount_hint">например 500 000</string>
+    <string name="rate">Ставка, % годовых</string>
+    <string name="rate_hint">например 16</string>
+    <string name="term">Срок</string>
+    <string name="start_date">Дата открытия</string>
+    <string name="capitalization">Капитализация процентов</string>
+    <string name="topup">Ежемесячное пополнение, ₽</string>
+    <string name="topup_hint">0 — без пополнений</string>
+    <string name="tax_enabled">Учитывать НДФЛ 13 % с дохода</string>
+    <string name="tax_free">Необлагаемая сумма дохода, ₽</string>
+    <string name="tax_free_hint">1 000 000 × ключевая ставка</string>
+    <string name="calculate">Рассчитать</string>
+
+    <string name="result">Результат</string>
+    <string name="payout">Сумма в конце срока</string>
+    <string name="schedule">График по месяцам</string>
+    <string name="comparison">Сравнение схем капитализации</string>
+
+    <string name="formula_note">Проценты начисляются ежедневно на текущий остаток: остаток × ставка / 100 / дней в году (365 или 366). В дату капитализации накопленные проценты присоединяются к вкладу. Эффективная ставка учитывает даты пополнений и налог.</string>
+</resources>

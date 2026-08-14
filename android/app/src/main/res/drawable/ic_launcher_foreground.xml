@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Растущие столбики: символ прироста вклада. Безопасная зона — центр 72×72 dp. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,60h11v14h-11z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48.5,50h11v24h-11z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M63,40h11v34h-11z" />
+    <path
+        android:fillColor="#95D5B2"
+        android:pathData="M34,49.5l-2.5,-2.5 12,-12 8,8 14,-14 -6,-6h16v16l-6,-6 -18,18 -8,-8z" />
+</vector>

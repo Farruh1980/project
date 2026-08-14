@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/screen"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Условия вклада -->
+        <LinearLayout
+            style="@style/Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/conditions" />
+
+            <TextView
+                style="@style/Label"
+                android:text="@string/amount" />
+
+            <EditText
+                android:id="@+id/amount"
+                style="@style/Field"
+                android:hint="@string/amount_hint"
+                android:importantForAutofill="no"
+                android:inputType="numberDecimal"
+                android:text="500000" />
+
+            <TextView
+                style="@style/Label"
+                android:text="@string/rate" />
+
+            <EditText
+                android:id="@+id/rate"
+                style="@style/Field"
+                android:hint="@string/rate_hint"
+                android:importantForAutofill="no"
+                android:inputType="numberDecimal"
+                android:text="16" />
+
+            <TextView
+                style="@style/Label"
+                android:text="@string/term" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/term"
+                    style="@style/Field"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:text="12" />
+
+                <Spinner
+                    android:id="@+id/term_unit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/Label"
+                android:text="@string/start_date" />
+
+            <Button
+                android:id="@+id/start_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAllCaps="false" />
+
+            <TextView
+                style="@style/Label"
+                android:text="@string/capitalization" />
+
+            <Spinner
+                android:id="@+id/capitalization"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                style="@style/Label"
+                android:text="@string/topup" />
+
+            <EditText
+                android:id="@+id/topup"
+                style="@style/Field"
+                android:hint="@string/topup_hint"
+                android:importantForAutofill="no"
+                android:inputType="numberDecimal" />
+
+            <CheckBox
+                android:id="@+id/tax_enabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/tax_enabled" />
+
+            <LinearLayout
+                android:id="@+id/tax_free_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/Label"
+                    android:text="@string/tax_free" />
+
+                <EditText
+                    android:id="@+id/tax_free"
+                    style="@style/Field"
+                    android:hint="@string/tax_free_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:text="160000" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/calculate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@color/accent"
+                android:text="@string/calculate"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@color/error_background"
+            android:padding="14dp"
+            android:textColor="@color/error_text"
+            android:textSize="15sp"
+            android:visibility="gone" />
+
+        <!-- Результат -->
+        <LinearLayout
+            android:id="@+id/result_card"
+            style="@style/Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/result" />
+
+            <TextView
+                style="@style/Label"
+                android:text="@string/payout" />
+
+            <TextView
+                android:id="@+id/payout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/accent"
+                android:textSize="30sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:lineSpacingExtra="4dp"
+                android:textColor="@color/text"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <!-- График -->
+        <LinearLayout
+            android:id="@+id/schedule_card"
+            style="@style/Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/schedule" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TableLayout
+                    android:id="@+id/schedule"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </HorizontalScrollView>
+        </LinearLayout>
+
+        <!-- Сравнение схем -->
+        <LinearLayout
+            android:id="@+id/compare_card"
+            style="@style/Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/comparison" />
+
+            <TextView
+                android:id="@+id/compare"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="5dp"
+                android:textColor="@color/text"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="14dp"
+            android:text="@string/formula_note"
+            android:textColor="@color/muted"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>
