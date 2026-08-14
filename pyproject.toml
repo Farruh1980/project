@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deposit-calc"
+version = "1.0.0"
+description = "Калькулятор банковских вкладов: капитализация, пополнения, снятия, налог и эффективная ставка"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["вклад", "депозит", "проценты", "капитализация", "калькулятор"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: Russian",
+    "Programming Language :: Python :: 3",
+    "Topic :: Office/Business :: Financial",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+deposit-calc = "deposit_calc.cli:main"
+
+[tool.setuptools]
+packages = ["deposit_calc"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
