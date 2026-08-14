@@ -76,6 +76,10 @@ public class MainActivity extends Activity {
         compareView = findViewById(R.id.compare);
         compareCard = findViewById(R.id.compare_card);
 
+        // Денежные поля показывают разряды прямо во время ввода: 1 000 000.
+        ThousandsWatcher.attach(amountField);
+        ThousandsWatcher.attach(topupField);
+
         termUnitSpinner.setAdapter(adapter(TERM_UNITS));
         List<String> capTitles = new ArrayList<>();
         for (Capitalization cap : CAPS) {

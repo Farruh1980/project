@@ -20,7 +20,10 @@ import java.util.List;
  */
 public final class DepositCalculator {
 
-    private static final MathContext MC = new MathContext(20, RoundingMode.HALF_UP);
+    // Точность и правило округления промежуточных вычислений совпадают
+    // с контекстом Decimal по умолчанию в Python — иначе версии расходятся
+    // в копейках на больших суммах.
+    private static final MathContext MC = new MathContext(28, RoundingMode.HALF_EVEN);
     private static final BigDecimal HUNDRED = new BigDecimal("100");
 
     private DepositCalculator() {
@@ -145,8 +148,8 @@ public final class DepositCalculator {
             if (balanceAtEnd.signum() == 0) {
                 return BigDecimal.ZERO;
             }
-            return totalInterest.multiply(HUNDRED)
-                    .divide(balanceAtEnd, 2, RoundingMode.HALF_UP);
+            return totalInterest.divide(balanceAtEnd, MC)
+                    .multiply(HUNDRED).setScale(2, RoundingMode.HALF_UP);
         }
     }
 

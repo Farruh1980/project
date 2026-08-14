@@ -28,10 +28,11 @@
             <EditText
                 android:id="@+id/amount"
                 style="@style/Field"
+                android:digits="0123456789, "
                 android:hint="@string/amount_hint"
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal"
-                android:text="10000000" />
+                android:text="10 000 000" />
 
             <TextView
                 style="@style/Label"
@@ -99,6 +100,7 @@
             <EditText
                 android:id="@+id/topup"
                 style="@style/Field"
+                android:digits="0123456789, "
                 android:hint="@string/topup_hint"
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal" />

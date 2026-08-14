@@ -69,9 +69,22 @@ public class MainActivityTest {
     }
 
     @Test
-    public void некорректноеЧислоНеРоняетПриложение() {
+    public void нецифровойВводНеПопадаетВПолеСуммы() {
         MainActivity activity = открытьЭкран();
         заполнить(activity, "сто тысяч", "10", "12");
+        // Разбивка по разрядам отбрасывает всё, кроме цифр, — поле остаётся пустым.
+        assertEquals("", ((EditText) activity.findViewById(R.id.amount)).getText().toString());
+
+        activity.findViewById(R.id.calculate).performClick();
+        View ошибка = activity.findViewById(R.id.error);
+        assertEquals(View.VISIBLE, ошибка.getVisibility());
+        assertEquals("Введите сумму вклада", ((TextView) ошибка).getText().toString());
+    }
+
+    @Test
+    public void нечисловаяСтавкаНеРоняетПриложение() {
+        MainActivity activity = открытьЭкран();
+        заполнить(activity, "1000000", "много", "12");
         activity.findViewById(R.id.calculate).performClick();
 
         View ошибка = activity.findViewById(R.id.error);
@@ -80,10 +93,55 @@ public class MainActivityTest {
     }
 
     @Test
+    public void вводСуммыРазбиваетсяПоРазрядам() {
+        MainActivity activity = открытьЭкран();
+        EditText сумма = activity.findViewById(R.id.amount);
+        сумма.setText("1000000000000");
+        assertEquals("1 000 000 000 000", сумма.getText().toString());
+        assertEquals("курсор должен стоять в конце",
+                сумма.getText().length(), сумма.getSelectionStart());
+
+        сумма.setText("50000");
+        assertEquals("50 000", сумма.getText().toString());
+    }
+
+    @Test
+    public void расчётПонимаетСуммуСРазрядами() {
+        MainActivity activity = открытьЭкран();
+        заполнить(activity, "1000000", "10", "12");
+        assertEquals("1 000 000",
+                ((EditText) activity.findViewById(R.id.amount)).getText().toString());
+        activity.findViewById(R.id.calculate).performClick();
+
+        // Эталон считаем ядром на тех же условиях: экран открывается на сегодняшней
+        // дате, поэтому жёсткое число здесь зависело бы от дня запуска теста.
+        DepositCalculator.Params эталон = new DepositCalculator.Params();
+        эталон.amount = new java.math.BigDecimal("1000000");
+        эталон.annualRate = new java.math.BigDecimal("10");
+        эталон.start = java.time.LocalDate.now();
+        эталон.end = эталон.start.plusMonths(12);
+        эталон.capitalization = DepositCalculator.Capitalization.MONTHLY;
+
+        String выплата = ((TextView) activity.findViewById(R.id.payout)).getText().toString();
+        assertEquals(Formats.sum(DepositCalculator.calculate(эталон).payout()), выплата);
+        assertTrue("получено: " + выплата, выплата.startsWith("1 10"));
+    }
+
+    @Test
+    public void полеСтавкиНеРазбиваетсяПоРазрядам() {
+        MainActivity activity = открытьЭкран();
+        EditText ставка = activity.findViewById(R.id.rate);
+        ставка.setText("24,5");
+        assertEquals("24,5", ставка.getText().toString());
+    }
+
+    @Test
     public void пополнениеУчитываетсяВРасчёте() {
         MainActivity activity = открытьЭкран();
         заполнить(activity, "100000", "10", "12");
-        ((EditText) activity.findViewById(R.id.topup)).setText("10000");
+        EditText пополнение = activity.findViewById(R.id.topup);
+        пополнение.setText("10000");
+        assertEquals("10 000", пополнение.getText().toString());
         activity.findViewById(R.id.calculate).performClick();
 
         String итог = ((TextView) activity.findViewById(R.id.summary)).getText().toString();

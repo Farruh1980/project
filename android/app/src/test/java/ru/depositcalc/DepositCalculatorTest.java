@@ -62,6 +62,18 @@ public class DepositCalculatorTest {
     }
 
     @Test
+    public void точностьСовпадаетСPythonНаБольшихСуммах() {
+        // Промежуточные вычисления идут с той же точностью, что и в Python,
+        // иначе на крупных суммах версии расходятся в копейках.
+        Params p = params(Capitalization.MONTHLY, 12);
+        p.amount = new BigDecimal("1000000");
+        assertEquals("1104712.72", DepositCalculator.calculate(p).payout().toPlainString());
+
+        p.amount = new BigDecimal("1500000000");
+        assertEquals("1657069055.63", DepositCalculator.calculate(p).payout().toPlainString());
+    }
+
+    @Test
     public void годоваяКапитализацияЗаГодРавнаПростымПроцентам() {
         assertEquals(
                 DepositCalculator.calculate(params(Capitalization.NONE, 12)).payout(),
