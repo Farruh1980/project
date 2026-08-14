@@ -52,7 +52,7 @@ def test_разбор_операции():
 
 
 def test_форматирование_суммы():
-    assert fmt_money(Decimal("1234567.891"), "₽") == "1 234 567,89 ₽"
+    assert fmt_money(Decimal("1234567.891"), "сўм") == "1 234 567,89 сўм"
     assert fmt_money(Decimal("0")) == "0,00"
 
 
@@ -64,7 +64,7 @@ def test_запуск_расчёта(capsys):
     ])
     вывод = capsys.readouterr().out
     assert код == 0
-    assert "110 000,00 ₽" in вывод
+    assert "110 000,00 сўм" in вывод
     assert "ГРАФИК" in вывод
 
 
@@ -93,6 +93,19 @@ def test_срок_днями_и_дата_закрытия_дают_один_ре
     main(["-a", "100000", "-r", "10", "--start", "01.01.2023", "--end", "01.01.2024", "--json"])
     по_дате = json.loads(capsys.readouterr().out)
     assert по_дням["итоги"] == по_дате["итоги"]
+
+
+def test_налоговых_опций_больше_нет(capsys):
+    with pytest.raises(SystemExit):
+        main(["-a", "100000", "-r", "10", "--term", "12", "--tax-rate", "13"])
+    assert "unrecognized arguments" in capsys.readouterr().err
+
+
+def test_валюта_по_умолчанию_сум(capsys):
+    main(["-a", "1000000", "-r", "20", "--start", "01.01.2023", "--term", "12"])
+    вывод = capsys.readouterr().out
+    assert "сўм" in вывод
+    assert "₽" not in вывод
 
 
 def test_ошибка_в_условиях_возвращает_код_2(capsys):

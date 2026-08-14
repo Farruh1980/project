@@ -34,9 +34,9 @@ public final class Formats {
         return negative ? "−" + result : result;
     }
 
-    /** Сумма с рублём: «1 234 567,89 ₽». */
-    public static String rub(BigDecimal value) {
-        return money(value) + " ₽";
+    /** Сумма с валютой: «1 234 567,89 сўм». */
+    public static String sum(BigDecimal value) {
+        return money(value) + " сўм";
     }
 
     /** «16,00 %». */

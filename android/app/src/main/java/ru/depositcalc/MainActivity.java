@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -43,9 +42,6 @@ public class MainActivity extends Activity {
     private Button startDateButton;
     private Spinner capSpinner;
     private EditText topupField;
-    private CheckBox taxCheckBox;
-    private EditText taxFreeField;
-    private View taxFreeRow;
 
     private View resultCard;
     private TextView payoutView;
@@ -70,9 +66,6 @@ public class MainActivity extends Activity {
         startDateButton = findViewById(R.id.start_date);
         capSpinner = findViewById(R.id.capitalization);
         topupField = findViewById(R.id.topup);
-        taxCheckBox = findViewById(R.id.tax_enabled);
-        taxFreeField = findViewById(R.id.tax_free);
-        taxFreeRow = findViewById(R.id.tax_free_row);
 
         resultCard = findViewById(R.id.result_card);
         payoutView = findViewById(R.id.payout);
@@ -93,10 +86,6 @@ public class MainActivity extends Activity {
 
         updateStartDateButton();
         startDateButton.setOnClickListener(v -> pickStartDate());
-
-        taxCheckBox.setOnCheckedChangeListener((button, checked) ->
-                taxFreeRow.setVisibility(checked ? View.VISIBLE : View.GONE));
-        taxFreeRow.setVisibility(taxCheckBox.isChecked() ? View.VISIBLE : View.GONE);
 
         findViewById(R.id.calculate).setOnClickListener(v -> calculate());
 
@@ -194,11 +183,6 @@ public class MainActivity extends Activity {
                     params.start, params.end, topup, 1);
         }
 
-        if (taxCheckBox.isChecked()) {
-            params.taxRate = new BigDecimal("13");
-            params.taxFreeIncome = Formats.parseNumber(
-                    taxFreeField.getText().toString(), BigDecimal.ZERO);
-        }
         return params;
     }
 
@@ -225,28 +209,20 @@ public class MainActivity extends Activity {
         compareCard.setVisibility(View.VISIBLE);
 
         Params p = result.params;
-        payoutView.setText(Formats.rub(result.payout()));
+        payoutView.setText(Formats.sum(result.payout()));
 
         long days = p.termDays();
         StringBuilder text = new StringBuilder();
         text.append("Срок: ").append(Formats.date(p.start)).append(" — ")
                 .append(Formats.date(p.end)).append(", ").append(days).append(' ')
                 .append(Formats.plural(days, "день", "дня", "дней")).append('\n');
-        text.append("Вложено собственных: ").append(Formats.rub(result.invested())).append('\n');
+        text.append("Вложено собственных: ").append(Formats.sum(result.invested())).append('\n');
         if (result.totalTopups.signum() > 0) {
             text.append("В том числе пополнений: ")
-                    .append(Formats.rub(result.totalTopups)).append('\n');
+                    .append(Formats.sum(result.totalTopups)).append('\n');
         }
         text.append("Начислено процентов: ")
-                .append(Formats.rub(result.totalInterest)).append('\n');
-        if (p.taxRate.signum() > 0) {
-            text.append("НДФЛ ").append(Formats.percent(p.taxRate)).append(": ")
-                    .append(result.tax.signum() > 0
-                            ? "−" + Formats.rub(result.tax)
-                            : "не удерживается")
-                    .append('\n');
-            text.append("Доход после налога: ").append(Formats.rub(result.income())).append('\n');
-        }
+                .append(Formats.sum(result.totalInterest)).append('\n');
         text.append("Эффективная ставка: ")
                 .append(Formats.percent(result.effectiveRate)).append(" годовых");
         summaryView.setText(text.toString());
@@ -323,8 +299,6 @@ public class MainActivity extends Activity {
             variant.end = p.end;
             variant.capitalization = option;
             variant.cashFlows = new ArrayList<>(p.cashFlows);
-            variant.taxRate = p.taxRate;
-            variant.taxFreeIncome = p.taxFreeIncome;
             variant.minBalance = p.minBalance;
 
             BigDecimal payout;
@@ -335,7 +309,7 @@ public class MainActivity extends Activity {
             }
             BigDecimal delta = payout.subtract(baseline);
 
-            text.append(option.title).append(": ").append(Formats.rub(payout));
+            text.append(option.title).append(": ").append(Formats.sum(payout));
             if (option == p.capitalization) {
                 text.append("  ← выбрано");
             } else if (delta.signum() > 0) {

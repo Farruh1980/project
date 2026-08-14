@@ -73,8 +73,6 @@ public final class DepositCalculator {
         public LocalDate end = LocalDate.now().plusYears(1);
         public Capitalization capitalization = Capitalization.NONE;
         public List<CashFlow> cashFlows = new ArrayList<>();
-        public BigDecimal taxRate = BigDecimal.ZERO;
-        public BigDecimal taxFreeIncome = BigDecimal.ZERO;
         public BigDecimal minBalance = BigDecimal.ZERO;
 
         public long termDays() {
@@ -91,9 +89,6 @@ public final class DepositCalculator {
             }
             if (!end.isAfter(start)) {
                 throw new IllegalArgumentException("Дата закрытия должна быть позже даты открытия");
-            }
-            if (taxRate.signum() < 0 || taxRate.compareTo(HUNDRED) > 0) {
-                throw new IllegalArgumentException("Ставка налога должна быть в диапазоне 0…100 %");
             }
             if (amount.compareTo(minBalance) < 0) {
                 throw new IllegalArgumentException("Сумма вклада меньше неснижаемого остатка");
@@ -127,7 +122,6 @@ public final class DepositCalculator {
         public BigDecimal totalTopups = BigDecimal.ZERO;
         public BigDecimal totalWithdrawals = BigDecimal.ZERO;
         public BigDecimal totalInterest = BigDecimal.ZERO;
-        public BigDecimal tax = BigDecimal.ZERO;
         public BigDecimal balanceAtEnd = BigDecimal.ZERO;
         public BigDecimal effectiveRate = BigDecimal.ZERO;
 
@@ -136,14 +130,14 @@ public final class DepositCalculator {
             return money(params.amount.add(totalTopups));
         }
 
-        /** Сумма к выдаче в конце срока после удержания налога. */
+        /** Сумма к выдаче в конце срока. */
         public BigDecimal payout() {
-            return money(balanceAtEnd.subtract(tax));
+            return money(balanceAtEnd);
         }
 
-        /** Чистый доход после налога. */
+        /** Доход по вкладу — начисленные проценты. */
         public BigDecimal income() {
-            return money(totalInterest.subtract(tax));
+            return money(totalInterest);
         }
 
         /** Доля процентов в итоговой сумме, %. */
@@ -209,7 +203,7 @@ public final class DepositCalculator {
         return dates;
     }
 
-    /** Рассчитывает вклад: график, проценты, налог и эффективную ставку. */
+    /** Рассчитывает вклад: график, проценты и эффективную ставку. */
     public static Result calculate(Params p) {
         p.validate();
         List<CashFlow> flows = new ArrayList<>(p.cashFlows);
@@ -309,14 +303,8 @@ public final class DepositCalculator {
         result.totalTopups = money(result.totalTopups);
         result.totalWithdrawals = money(result.totalWithdrawals);
 
-        BigDecimal taxable = result.totalInterest.subtract(p.taxFreeIncome);
-        if (taxable.signum() < 0) {
-            taxable = BigDecimal.ZERO;
-        }
-        result.tax = money(taxable.multiply(p.taxRate).divide(HUNDRED, MC));
-
         flowDates.add(p.end);
-        flowAmounts.add(result.balanceAtEnd.subtract(result.tax));
+        flowAmounts.add(result.balanceAtEnd);
         result.effectiveRate = xirr(flowDates, flowAmounts);
         return result;
     }

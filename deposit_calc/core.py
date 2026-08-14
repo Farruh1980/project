@@ -186,16 +186,12 @@ class DepositParams:
     end: date
     capitalization: Capitalization = Capitalization.NONE
     cash_flows: list[CashFlow] = field(default_factory=list)
-    tax_rate: Decimal = Decimal("0")
-    tax_free_income: Decimal = Decimal("0")
     min_balance: Decimal = Decimal("0")
 
     def __post_init__(self) -> None:
         self.amount = money(self.amount)
         self.annual_rate = to_decimal(self.annual_rate)
         self.capitalization = Capitalization.parse(self.capitalization)
-        self.tax_rate = to_decimal(self.tax_rate)
-        self.tax_free_income = money(self.tax_free_income)
         self.min_balance = money(self.min_balance)
 
         if self.amount <= 0:
@@ -204,8 +200,6 @@ class DepositParams:
             raise ValueError("ставка не может быть отрицательной")
         if self.end <= self.start:
             raise ValueError("дата закрытия должна быть позже даты открытия")
-        if not 0 <= self.tax_rate <= 100:
-            raise ValueError("ставка налога должна быть в диапазоне 0…100 %")
         if self.amount < self.min_balance:
             raise ValueError("сумма вклада меньше неснижаемого остатка")
         for flow in self.cash_flows:
@@ -244,7 +238,6 @@ class DepositResult:
     total_topups: Decimal
     total_withdrawals: Decimal
     total_interest: Decimal
-    tax: Decimal
     balance_at_end: Decimal
     effective_rate: Decimal
 
@@ -255,13 +248,13 @@ class DepositResult:
 
     @property
     def payout(self) -> Decimal:
-        """Сумма к выдаче в конце срока после удержания налога."""
-        return money(self.balance_at_end - self.tax)
+        """Сумма к выдаче в конце срока."""
+        return self.balance_at_end
 
     @property
     def income(self) -> Decimal:
-        """Чистый доход по вкладу (после налога)."""
-        return money(self.total_interest - self.tax)
+        """Доход по вкладу — начисленные проценты."""
+        return self.total_interest
 
     @property
     def interest_share(self) -> Decimal:
@@ -344,7 +337,7 @@ def _xirr(flows: list[tuple[date, Decimal]]) -> Decimal:
 
 
 def calculate(params: DepositParams) -> DepositResult:
-    """Рассчитывает вклад: график, проценты, налог и эффективную ставку."""
+    """Рассчитывает вклад: график, проценты и эффективную ставку."""
     flows_by_date: dict[date, list[CashFlow]] = defaultdict(list)
     for flow in params.cash_flows:
         flows_by_date[flow.date].append(flow)
@@ -420,10 +413,7 @@ def calculate(params: DepositParams) -> DepositResult:
     balance_at_end = money(balance + tail)
 
     total_interest = money(total_interest)
-    taxable = max(Decimal(0), total_interest - params.tax_free_income)
-    tax = money(taxable * params.tax_rate / Decimal(100))
-
-    investor_flows.append((params.end, balance_at_end - tax))
+    investor_flows.append((params.end, balance_at_end))
 
     return DepositResult(
         params=params,
@@ -431,7 +421,6 @@ def calculate(params: DepositParams) -> DepositResult:
         total_topups=money(total_topups),
         total_withdrawals=money(total_withdrawals),
         total_interest=total_interest,
-        tax=tax,
         balance_at_end=balance_at_end,
         effective_rate=_xirr(investor_flows),
     )

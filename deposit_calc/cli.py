@@ -140,13 +140,6 @@ def render_summary(result: DepositResult, currency: str) -> str:
         "РЕЗУЛЬТАТ",
         f"  Вложено собственных  : {fmt_money(result.invested, currency)}",
         f"  Начислено процентов  : {fmt_money(result.total_interest, currency)}",
-    ]
-    if p.tax_rate:
-        вычет = f" (вычет {fmt_money(p.tax_free_income, currency)})" if p.tax_free_income else ""
-        сумма = f"−{fmt_money(result.tax, currency)}" if result.tax else "не удерживается"
-        lines.append(f"  Налог {fmt_rate(p.tax_rate)}{вычет} : {сумма}")
-        lines.append(f"  Доход после налога   : {fmt_money(result.income, currency)}")
-    lines += [
         f"  Сумма в конце срока  : {fmt_money(result.payout, currency)}",
         f"  Эффективная ставка   : {fmt_rate(result.effective_rate)} годовых",
         f"  Доля процентов в итоговой сумме: {fmt_rate(result.interest_share)}",
@@ -214,8 +207,6 @@ def render_comparison(result: DepositResult, currency: str) -> str:
             end=p.end,
             capitalization=option,
             cash_flows=list(p.cash_flows),
-            tax_rate=p.tax_rate,
-            tax_free_income=p.tax_free_income,
             min_balance=p.min_balance,
         )
         computed = calculate(variant)
@@ -255,8 +246,6 @@ def result_to_dict(result: DepositResult, currency: str) -> dict:
             "дата_закрытия": p.end.isoformat(),
             "срок_дней": p.term_days,
             "капитализация": p.capitalization.value,
-            "ставка_налога": str(p.tax_rate),
-            "необлагаемый_доход": str(p.tax_free_income),
             "неснижаемый_остаток": str(p.min_balance),
         },
         "итоги": {
@@ -264,8 +253,6 @@ def result_to_dict(result: DepositResult, currency: str) -> dict:
             "пополнения": str(result.total_topups),
             "снятия": str(result.total_withdrawals),
             "начислено_процентов": str(result.total_interest),
-            "налог": str(result.tax),
-            "доход_после_налога": str(result.income),
             "сумма_в_конце_срока": str(result.payout),
             "эффективная_ставка": str(result.effective_rate),
         },
@@ -309,8 +296,8 @@ def ask(prompt: str, default: str | None = None, parser=None):
 
 def interactive(args: argparse.Namespace) -> argparse.Namespace:
     print("Калькулятор вкладов — интерактивный режим (Enter принимает значение по умолчанию)\n")
-    args.amount = ask("Сумма вклада", "100000", parse_number)
-    args.rate = ask("Ставка, % годовых", "16", parse_number)
+    args.amount = ask("Сумма вклада, сўм", "10000000", parse_number)
+    args.rate = ask("Ставка, % годовых", "24", parse_number)
     args.start = ask("Дата открытия", date.today().strftime("%d.%m.%Y"), parse_date)
     term, unit = ask("Срок (например 12, 18м, 540д, 3г)", "12", parse_term)
     args.months, args.days = (term, None) if unit == "m" else (None, term)
@@ -320,13 +307,9 @@ def interactive(args: argparse.Namespace) -> argparse.Namespace:
         "ежемесячно",
         Capitalization.parse,
     )
-    topup = ask("Ежемесячное пополнение (0 — без пополнений)", "0", parse_number)
+    topup = ask("Ежемесячное пополнение, сўм (0 — без пополнений)", "0", parse_number)
     args.topup = topup if topup else None
     args.topup_period = 1
-    tax = ask("Ставка НДФЛ на доход, % (0 — не считать)", "0", parse_number)
-    args.tax_rate = tax
-    if tax:
-        args.tax_free = ask("Необлагаемая сумма дохода", "0", parse_number)
     args.schedule = ask("Показать график? (д/н)", "д").lower().startswith(("д", "y"))
     args.compare = ask("Сравнить схемы капитализации? (д/н)", "н").lower().startswith(("д", "y"))
     print()
@@ -365,8 +348,6 @@ def build_params(args: argparse.Namespace) -> DepositParams:
         end=end,
         capitalization=args.cap,
         cash_flows=flows,
-        tax_rate=args.tax_rate or 0,
-        tax_free_income=args.tax_free or 0,
         min_balance=args.min_balance or 0,
     )
 
@@ -375,13 +356,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="deposit-calc",
         description="Калькулятор банковских вкладов: проценты, капитализация, "
-                    "пополнения, снятия, налог и эффективная ставка.",
+                    "пополнения, снятия и эффективная ставка.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""примеры:
-  deposit-calc -a 500000 -r 16 --term 12 --cap ежемесячно --schedule
-  deposit-calc -a 100000 -r 14 --term 540д --topup 10000 --compare
-  deposit-calc -a 1000000 -r 18 --term 3г --tax-rate 13 --tax-free 160000
-  deposit-calc -a 300000 -r 15 --term 12 --flow 01.03.2026:50000 --flow 01.06.2026:-20000
+  deposit-calc -a 10000000 -r 24 --term 12 --cap ежемесячно --schedule
+  deposit-calc -a 5000000 -r 22 --term 540д --topup 500000 --compare
+  deposit-calc -a 50000000 -r 26 --term 3г --cap ежеквартально
+  deposit-calc -a 20000000 -r 23 --term 12 --flow 01.03.2026:5000000 --flow 01.06.2026:-2000000
   deposit-calc -i          # диалоговый режим
 """,
     )
@@ -405,10 +386,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--flow", action="append", type=parse_flow, metavar="ДАТА:СУММА",
                         help="разовая операция: «+» — пополнение, «−» — снятие (можно повторять)")
     parser.add_argument("--min-balance", type=parse_number, help="неснижаемый остаток")
-    parser.add_argument("--tax-rate", type=parse_number, help="ставка налога на доход, %%")
-    parser.add_argument("--tax-free", type=parse_number,
-                        help="необлагаемая сумма процентного дохода")
-    parser.add_argument("--currency", default="₽", help="обозначение валюты (по умолчанию ₽)")
+    parser.add_argument("--currency", default="сўм",
+                        help="обозначение валюты (по умолчанию сўм)")
     parser.add_argument("-s", "--schedule", action="store_true", help="показать график по месяцам")
     parser.add_argument("--compare", action="store_true",
                         help="сравнить все схемы капитализации")

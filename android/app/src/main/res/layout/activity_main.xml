@@ -31,7 +31,7 @@
                 android:hint="@string/amount_hint"
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal"
-                android:text="500000" />
+                android:text="10000000" />
 
             <TextView
                 style="@style/Label"
@@ -43,7 +43,7 @@
                 android:hint="@string/rate_hint"
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal"
-                android:text="16" />
+                android:text="24" />
 
             <TextView
                 style="@style/Label"
@@ -102,33 +102,6 @@
                 android:hint="@string/topup_hint"
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal" />
-
-            <CheckBox
-                android:id="@+id/tax_enabled"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="@string/tax_enabled" />
-
-            <LinearLayout
-                android:id="@+id/tax_free_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    style="@style/Label"
-                    android:text="@string/tax_free" />
-
-                <EditText
-                    android:id="@+id/tax_free"
-                    style="@style/Field"
-                    android:hint="@string/tax_free_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="numberDecimal"
-                    android:text="160000" />
-            </LinearLayout>
 
             <Button
                 android:id="@+id/calculate"

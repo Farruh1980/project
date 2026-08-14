@@ -53,6 +53,12 @@ def test_период_через_границу_високосного_года(
     assert abs(result.total_interest - expected) < Decimal("0.01")
 
 
+def test_доход_равен_начисленным_процентам():
+    result = calculate(params())
+    assert result.income == result.total_interest
+    assert result.payout == result.balance_at_end
+
+
 def test_нулевая_ставка_не_даёт_дохода():
     result = calculate(params(annual_rate=0))
     assert result.total_interest == Decimal("0.00")
@@ -149,24 +155,6 @@ def test_операция_вне_срока_вклада_отклоняется(
 
 
 # --------------------------------------------------------------------------- #
-#  Налог
-# --------------------------------------------------------------------------- #
-
-def test_ндфл_считается_с_превышения_вычета():
-    result = calculate(params(tax_rate=Decimal("13"), tax_free_income=Decimal("4000")))
-    assert result.total_interest == Decimal("10000.00")
-    assert result.tax == Decimal("780.00")  # (10000 − 4000) * 13 %
-    assert result.income == Decimal("9220.00")
-    assert result.payout == Decimal("109220.00")
-
-
-def test_вычет_больше_дохода_обнуляет_налог():
-    result = calculate(params(tax_rate=Decimal("13"), tax_free_income=Decimal("160000")))
-    assert result.tax == Decimal("0.00")
-    assert result.payout == Decimal("110000.00")
-
-
-# --------------------------------------------------------------------------- #
 #  Эффективная ставка и график
 # --------------------------------------------------------------------------- #
 
@@ -178,12 +166,6 @@ def test_эффективная_ставка_без_капитализации_�
 def test_эффективная_ставка_выше_номинальной_при_капитализации():
     result = calculate(params(capitalization=Capitalization.MONTHLY))
     assert result.effective_rate > Decimal("10.4")
-
-
-def test_налог_снижает_эффективную_ставку():
-    без = calculate(params())
-    с_налогом = calculate(params(tax_rate=Decimal("13")))
-    assert с_налогом.effective_rate < без.effective_rate
 
 
 def test_график_покрывает_весь_срок_без_разрывов():
@@ -240,7 +222,6 @@ def test_разбор_названий_капитализации():
         (dict(amount=0), "больше нуля"),
         (dict(annual_rate=-1), "отрицательной"),
         (dict(end=date(2022, 1, 1)), "позже даты открытия"),
-        (dict(tax_rate=120), "0…100"),
         (dict(min_balance=Decimal("200000")), "меньше неснижаемого остатка"),
     ],
 )

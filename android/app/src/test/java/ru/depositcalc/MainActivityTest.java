@@ -46,6 +46,7 @@ public class MainActivityTest {
         assertEquals(View.VISIBLE, activity.findViewById(R.id.result_card).getVisibility());
         String выплата = ((TextView) activity.findViewById(R.id.payout)).getText().toString();
         assertTrue("получено: " + выплата, выплата.startsWith("110 4"));
+        assertTrue("получено: " + выплата, выплата.endsWith("сўм"));
 
         TableLayout график = activity.findViewById(R.id.schedule);
         assertEquals(14, график.getChildCount()); // шапка + 12 месяцев + итог
@@ -86,7 +87,7 @@ public class MainActivityTest {
         activity.findViewById(R.id.calculate).performClick();
 
         String итог = ((TextView) activity.findViewById(R.id.summary)).getText().toString();
-        assertTrue(итог.contains("В том числе пополнений: 110 000,00 ₽"));
-        assertTrue(итог.contains("Вложено собственных: 210 000,00 ₽"));
+        assertTrue(итог.contains("В том числе пополнений: 110 000,00 сўм"));
+        assertTrue(итог.contains("Вложено собственных: 210 000,00 сўм"));
     }
 }

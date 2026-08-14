@@ -92,13 +92,10 @@ public class DepositCalculatorTest {
     }
 
     @Test
-    public void ндфлСчитаетсяСПревышенияВычета() {
-        Params p = params(Capitalization.NONE, 12);
-        p.taxRate = new BigDecimal("13");
-        p.taxFreeIncome = new BigDecimal("4000");
-        Result r = DepositCalculator.calculate(p);
-        assertEquals("780.00", r.tax.toPlainString());
-        assertEquals("109220.00", r.payout().toPlainString());
+    public void доходРавенНачисленнымПроцентам() {
+        Result r = DepositCalculator.calculate(params(Capitalization.MONTHLY, 12));
+        assertEquals(r.totalInterest, r.income());
+        assertEquals(r.balanceAtEnd, r.payout());
     }
 
     @Test
@@ -135,6 +132,7 @@ public class DepositCalculatorTest {
     @Test
     public void форматированиеСумм() {
         assertEquals("1 234 567,89", Formats.money(new BigDecimal("1234567.891")));
+        assertEquals("1 234 567,89 сўм", Formats.sum(new BigDecimal("1234567.891")));
         assertEquals("0,00", Formats.money(BigDecimal.ZERO));
         assertEquals("−500,00", Formats.money(new BigDecimal("-500")));
         assertEquals("16,00 %", Formats.percent(new BigDecimal("16")));
