@@ -67,6 +67,20 @@ Robolectric нужен только тестам, в APK его нет.
 Дополнительно расчёты Java-порта сверены с Python на 720 сочетаниях суммы,
 ставки, схемы капитализации, пополнения и срока — расхождений нет.
 
+## Скриншоты без эмулятора
+
+Эмулятору Android нужен доступ к аппаратной виртуализации (`/dev/kvm`), который
+есть не в любой среде. Экран можно отрисовать прямо на JVM — Robolectric в
+режиме нативной графики рисует настоящий кадр:
+
+```bash
+cd android
+gradle testDebugUnitTest --tests 'ru.depositcalc.ScreenshotTest'
+```
+
+PNG появятся в `app/build/screenshots/`. Тест `ScreenshotTest` снимает два
+кадра: пустую форму и экран после расчёта.
+
 ## Структура
 
 | Файл | Назначение |
@@ -76,4 +90,4 @@ Robolectric нужен только тестам, в APK его нет.
 | `app/src/main/java/ru/depositcalc/ThousandsWatcher.java` | разбивка вводимых сумм по разрядам |
 | `app/src/main/java/ru/depositcalc/MainActivity.java` | единственный экран |
 | `app/src/main/res/layout/activity_main.xml` | разметка экрана |
-| `app/src/test/java/ru/depositcalc/` | тесты |
+| `app/src/test/java/ru/depositcalc/` | тесты, включая снятие скриншотов |
